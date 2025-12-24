@@ -30,7 +30,7 @@ export async function createTable(formData: FormData) {
 
     if (error) {
         console.error('Error creating table:', error);
-        return { error: 'Failed to create table' };
+        return { error: `Failed to create table: ${error.message}` };
     }
 
     revalidatePath('/admin/tables');
@@ -42,7 +42,7 @@ export async function deleteTable(id: string) {
     const { error } = await supabase.from('tables').delete().eq('id', id);
 
     if (error) {
-        return { error: 'Failed to delete table' };
+        return { error: `Failed to delete table: ${error.message}` };
     }
 
     revalidatePath('/admin/tables');

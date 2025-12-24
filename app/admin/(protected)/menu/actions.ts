@@ -15,7 +15,7 @@ export async function createCategory(formData: FormData) {
 
     const { error } = await supabase.from('categories').insert({ name, user_id: user.id });
 
-    if (error) return { error: 'Failed to create category' };
+    if (error) return { error: `Failed to create category: ${error.message}` };
 
     revalidatePath('/admin/menu');
     return { success: true };
@@ -99,8 +99,8 @@ export async function createMenuItem(formData: FormData) {
     });
 
     if (error) {
-        console.error(error);
-        return { error: 'Failed to create item' };
+        console.error('Create item error:', error);
+        return { error: `Failed to create item: ${error.message} (${error.code})` };
     }
 
     revalidatePath('/admin/menu');
@@ -171,7 +171,7 @@ export async function updateMenuItem(formData: FormData) {
 
     if (error) {
         console.error('Error updating item:', error);
-        return { error: 'Failed to update item' };
+        return { error: `Failed to update item: ${error.message}` };
     }
 
     revalidatePath('/admin/menu');
@@ -199,7 +199,7 @@ export async function deleteMenuItem(id: string) {
 
     if (error) {
         console.error('Delete error:', error);
-        return { error: 'Failed to delete' };
+        return { error: `Failed to delete: ${error.message}` };
     }
 
     revalidatePath('/admin/menu');
