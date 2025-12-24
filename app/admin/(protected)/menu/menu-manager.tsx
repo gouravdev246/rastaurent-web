@@ -47,9 +47,16 @@ export default function MenuManager({ categories, menuItems }: { categories: any
                                 >
                                     {cat.name}
                                 </button>
-                                <button onClick={() => confirm('Delete category?') && deleteCategory(cat.id)} className="hidden lg:block opacity-0 group-hover:opacity-100 p-2 text-destructive hover:bg-destructive/10 rounded-full transition-all">
-                                    <Trash2 size={16} />
-                                </button>
+                                <form action={async () => {
+                                    if (confirm('Delete category?')) {
+                                        const res = await deleteCategory(cat.id);
+                                        if (res?.error) alert(res.error);
+                                    }
+                                }}>
+                                    <button type="submit" className="hidden lg:block opacity-0 group-hover:opacity-100 p-2 text-destructive hover:bg-destructive/10 rounded-full transition-all">
+                                        <Trash2 size={16} />
+                                    </button>
+                                </form>
                             </div>
                         ))}
                         {categories.length === 0 && <div className="text-sm text-muted-foreground">No categories.</div>}
@@ -122,13 +129,20 @@ export default function MenuManager({ categories, menuItems }: { categories: any
                                         >
                                             <Pencil size={18} />
                                         </button>
-                                        <button
-                                            onClick={() => confirm('Delete item?') && deleteMenuItem(item.id)}
-                                            className="text-muted-foreground hover:text-destructive p-1 rounded transition-colors"
-                                            title="Delete Item"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                        <form action={async () => {
+                                            if (confirm('Delete item?')) {
+                                                const res = await deleteMenuItem(item.id);
+                                                if (res?.error) alert(res.error);
+                                            }
+                                        }}>
+                                            <button
+                                                type="submit"
+                                                className="text-muted-foreground hover:text-destructive p-1 rounded transition-colors"
+                                                title="Delete Item"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -164,9 +178,11 @@ function ItemModal({ categoryId, item, onClose }: { categoryId: string, item?: a
                     <form id="item-form" action={async (fd) => {
                         if (item) {
                             fd.append('id', item.id);
-                            await updateMenuItem(fd);
+                            const res = await updateMenuItem(fd);
+                            if (res?.error) alert(res.error);
                         } else {
-                            await createMenuItem(fd);
+                            const res = await createMenuItem(fd);
+                            if (res?.error) alert(res.error);
                         }
                         onClose();
                     }} className="space-y-4">

@@ -23,9 +23,22 @@ export async function createCategory(formData: FormData) {
 
 export async function deleteCategory(id: string) {
     const supabase = await createClient();
-    const { error } = await supabase.from('categories').delete().eq('id', id);
-    if (error) return { error: 'Failed' };
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Unauthorized' };
+
+    const { error } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+    if (error) {
+        console.error('Category delete error:', error);
+        return { error: 'Failed' };
+    }
+
     revalidatePath('/admin/menu');
+    revalidatePath('/');
     return { success: true };
 }
 
@@ -175,7 +188,21 @@ export async function toggleAvailability(id: string, currentStatus: boolean) {
 
 export async function deleteMenuItem(id: string) {
     const supabase = await createClient();
-    await supabase.from('menu_items').delete().eq('id', id);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Unauthorized' };
+
+    const { error } = await supabase
+        .from('menu_items')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+    if (error) {
+        console.error('Delete error:', error);
+        return { error: 'Failed to delete' };
+    }
+
     revalidatePath('/admin/menu');
+    revalidatePath('/');
     return { success: true };
 }

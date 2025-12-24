@@ -68,7 +68,8 @@ export default function TableManager({ tables }: { tables: any[] }) {
                             </div>
                             <form action={async () => {
                                 if (confirm('Are you sure you want to delete this table?')) {
-                                    await deleteTable(table.id);
+                                    const res = await deleteTable(table.id);
+                                    if (res?.error) alert(res.error);
                                 }
                             }}>
                                 <button
