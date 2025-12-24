@@ -94,8 +94,8 @@ export async function createMenuItem(formData: FormData) {
         image_url: finalImageUrl,
         is_available: true,
         user_id: user.id,
-        tags: tagsInput ? JSON.stringify(tagsInput.split(',').map(t => t.trim()).filter(Boolean)) : '[]',
-        pairings: pairingsInput ? JSON.stringify(pairingsInput.split(',').map(p => p.trim()).filter(Boolean)) : '[]'
+        tags: tagsInput ? JSON.stringify(tagsInput.split(',').map(t => t.trim()).filter(Boolean)) : '[]'
+        // pairings field removed
     });
 
     if (error) {
@@ -159,9 +159,7 @@ export async function updateMenuItem(formData: FormData) {
     if (tagsInput !== null) {
         updates.tags = JSON.stringify(tagsInput.split(',').map(t => t.trim()).filter(Boolean));
     }
-    if (pairingsInput !== null) {
-        updates.pairings = JSON.stringify(pairingsInput.split(',').map(p => p.trim()).filter(Boolean));
-    }
+    // Pairings removed
 
     const { error } = await supabase
         .from('menu_items')

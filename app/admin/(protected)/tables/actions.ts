@@ -39,6 +39,15 @@ export async function createTable(formData: FormData) {
 
 export async function deleteTable(id: string) {
     const supabase = await createClient();
+
+    // 1. Delete orders associated with this table first (Cascading delete manually)
+    const { error: ordersError } = await supabase.from('orders').delete().eq('table_id', id);
+    if (ordersError) {
+        console.error('Error deleting table orders:', ordersError);
+        return { error: `Failed to cleanup table orders: ${ordersError.message}` };
+    }
+
+    // 2. Delete the table
     const { error } = await supabase.from('tables').delete().eq('id', id);
 
     if (error) {
