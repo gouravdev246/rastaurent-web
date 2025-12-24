@@ -1,0 +1,1 @@
+﻿app/menu/[token]/customer-app.tsx(182,44): error TS7006: Parameter 'item' implicitly has an 'any' type.
