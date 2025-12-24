@@ -66,19 +66,25 @@ export default function TableManager({ tables }: { tables: any[] }) {
                                 <h3 className="font-bold text-lg">{table.name}</h3>
                                 <span className="text-xs text-muted-foreground font-mono">{table.token.slice(0, 8)}...</span>
                             </div>
-                            <button
-                                onClick={() => deleteTable(table.id)}
-                                className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                                title="Delete Table"
-                            >
-                                <Trash2 size={18} />
-                            </button>
+                            <form action={async () => {
+                                if (confirm('Are you sure you want to delete this table?')) {
+                                    await deleteTable(table.id);
+                                }
+                            }}>
+                                <button
+                                    type="submit"
+                                    className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                                    title="Delete Table"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </form>
                         </div>
 
                         <div className="p-6 flex flex-col items-center justify-center bg-white/5 gap-4">
                             {/* Small Preview QR */}
                             <div className="bg-white p-2 rounded-lg">
-                                <QRCode value={table.qr_code_url} size={100} />
+                                <QRCode value={typeof window !== 'undefined' ? `${window.location.origin}/menu/${table.token}` : table.qr_code_url} size={100} />
                             </div>
 
                             <div className="flex gap-2 w-full">
@@ -114,7 +120,7 @@ export default function TableManager({ tables }: { tables: any[] }) {
                         <div ref={printRef} className="p-8 flex flex-col items-center justify-center bg-white text-black">
                             <h2 className="text-2xl font-bold mb-2 text-black">Scan to Order</h2>
                             <p className="text-sm text-gray-500 mb-6 uppercase tracking-widest">{selectedQr.name}</p>
-                            <QRCode value={selectedQr.qr_code_url} size={250} />
+                            <QRCode value={typeof window !== 'undefined' ? `${window.location.origin}/menu/${selectedQr.token}` : selectedQr.qr_code_url} size={250} />
                             <p className="mt-6 text-xs text-gray-400 font-mono">rastaurent.app</p>
                         </div>
 

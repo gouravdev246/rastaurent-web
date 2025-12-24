@@ -7,12 +7,14 @@ export default async function DashboardPage() {
     const supabase = await createClient();
 
     // 1. Get Today's Revenue (Paid orders only)
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
     const { data: revenueData } = await supabase
         .from('orders')
         .select('total_amount')
         .eq('status', 'Paid')
-        .gte('created_at', `${today}T00:00:00`);
+        .gte('created_at', startOfToday);
 
     const todaysRevenue = revenueData?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
 

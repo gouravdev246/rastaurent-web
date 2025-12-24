@@ -18,7 +18,8 @@ export async function createTable(formData: FormData) {
     // Let's generate a random secure token here or use crypto.
     // Actually, using UUID for token is fine.
     const token = crypto.randomUUID();
-    const qr_code_url = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/menu/${token}`;
+    const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
+    const qr_code_url = `${baseUrl}/menu/${token}`;
 
     const { error } = await supabase.from('tables').insert({
         name,
