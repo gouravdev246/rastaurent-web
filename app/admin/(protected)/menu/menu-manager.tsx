@@ -47,16 +47,18 @@ export default function MenuManager({ categories, menuItems }: { categories: any
                                 >
                                     {cat.name}
                                 </button>
-                                <form action={async () => {
-                                    if (confirm('Delete category?')) {
-                                        const res = await deleteCategory(cat.id);
-                                        if (res?.error) alert(res.error);
-                                    }
-                                }}>
-                                    <button type="submit" className="hidden lg:block opacity-0 group-hover:opacity-100 p-2 text-destructive hover:bg-destructive/10 rounded-full transition-all">
-                                        <Trash2 size={16} />
-                                    </button>
-                                </form>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        if (confirm('Delete category? All items in this category will also be deleted.')) {
+                                            const res = await deleteCategory(cat.id);
+                                            if (res?.error) alert(res.error);
+                                        }
+                                    }}
+                                    className="opacity-50 lg:opacity-0 group-hover:opacity-100 p-2 text-destructive hover:bg-destructive/10 rounded-full transition-all"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
                             </div>
                         ))}
                         {categories.length === 0 && <div className="text-sm text-muted-foreground">No categories.</div>}

@@ -333,38 +333,43 @@ export default function CustomerApp({ table, categories, items, posters, adminSe
 
                 {/* Promo Posters Carousel */}
                 {!searchTerm && posters.length > 0 && (
-                    <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x no-scrollbar">
-                        {posters.map((poster: Poster) => (
-                            <button
-                                key={poster.id}
-                                onClick={() => {
-                                    if (poster.menu_item_id) {
-                                        // Find category for this item
-                                        const item = items.find(i => i.id === poster.menu_item_id);
-                                        if (item) {
-                                            // Select category first to ensure it's visible
-                                            setSelectedCategory(item.category_id);
-                                            // Slight delay to allow render, then scroll
-                                            setTimeout(() => {
-                                                const el = document.getElementById(`item-${poster.menu_item_id}`);
-                                                if (el) {
-                                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                                    el.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
-                                                    setTimeout(() => el.classList.remove('ring-2', 'ring-primary', 'ring-offset-2'), 2000);
-                                                }
-                                            }, 100);
+                    <div>
+                        <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                            🔥 Offers
+                        </h3>
+                        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x no-scrollbar">
+                            {posters.map((poster: Poster) => (
+                                <button
+                                    key={poster.id}
+                                    onClick={() => {
+                                        if (poster.menu_item_id) {
+                                            // Find category for this item
+                                            const item = items.find(i => i.id === poster.menu_item_id);
+                                            if (item) {
+                                                // Select category first to ensure it's visible
+                                                setSelectedCategory(item.category_id);
+                                                // Slight delay to allow render, then scroll
+                                                setTimeout(() => {
+                                                    const el = document.getElementById(`item-${poster.menu_item_id}`);
+                                                    if (el) {
+                                                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                        el.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+                                                        setTimeout(() => el.classList.remove('ring-2', 'ring-primary', 'ring-offset-2'), 2000);
+                                                    }
+                                                }, 100);
+                                            }
                                         }
-                                    }
-                                }}
-                                className="relative overflow-hidden rounded-2xl shadow-lg min-w-[85%] snap-center flex-shrink-0 aspect-[16/9] text-left transition-transform active:scale-[0.98]"
-                            >
-                                <img
-                                    src={poster.image_url}
-                                    alt={poster.title}
-                                    className="w-full h-full object-cover"
-                                />
-                            </button>
-                        ))}
+                                    }}
+                                    className="relative overflow-hidden rounded-2xl shadow-md min-w-[75%] snap-center flex-shrink-0 aspect-[2.5/1] text-left transition-transform active:scale-[0.98]"
+                                >
+                                    <img
+                                        src={poster.image_url}
+                                        alt={poster.title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 )}
 
