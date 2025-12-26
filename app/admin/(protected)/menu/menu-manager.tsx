@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createCategory, createMenuItem, updateMenuItem, deleteCategory, deleteMenuItem, toggleAvailability } from './actions';
-import { Plus, Trash2, Image as ImageIcon, Pencil, X, Upload, Link as LinkIcon, UtensilsCrossed } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Pencil, X, Upload, Link as LinkIcon, UtensilsCrossed, Eye, EyeOff } from 'lucide-react';
 
 export default function MenuManager({ categories, menuItems }: { categories: any[], menuItems: any[] }) {
     const [activeCategory, setActiveCategory] = useState<string | null>(categories[0]?.id || null);
@@ -122,6 +122,13 @@ export default function MenuManager({ categories, menuItems }: { categories: any
                                     <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 h-10 mb-4 items-center">{item.description}</p>
 
                                     <div className="flex justify-end pt-2 border-t border-border/50 mt-auto gap-2">
+                                        <button
+                                            onClick={() => toggleAvailability(item.id, item.is_available)}
+                                            className={`p-1 rounded transition-colors ${item.is_available ? 'text-green-500 hover:text-green-600' : 'text-red-500 hover:text-red-600'}`}
+                                            title={item.is_available ? 'Hide Item' : 'Show Item'}
+                                        >
+                                            {item.is_available ? <Eye size={18} /> : <EyeOff size={18} />}
+                                        </button>
                                         <button
                                             onClick={() => setEditingItem(item)}
                                             className="text-muted-foreground hover:text-primary p-1 rounded transition-colors"

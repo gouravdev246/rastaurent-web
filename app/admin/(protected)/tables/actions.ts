@@ -40,14 +40,40 @@ export async function createTable(formData: FormData) {
 export async function deleteTable(id: string) {
     const supabase = await createClient();
 
-    // 1. Delete orders associated with this table first (Cascading delete manually)
+    // 1. First, get all order IDs associated with this table
+    const { data: orders, error: fetchError } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('table_id', id);
+
+    if (fetchError) {
+        console.error('Error fetching table orders:', fetchError);
+        return { error: `Failed to fetch table orders: ${fetchError.message}` };
+    }
+
+    // 2. Delete order_items for all those orders
+    if (orders && orders.length > 0) {
+        const orderIds = orders.map(o => o.id);
+
+        const { error: orderItemsError } = await supabase
+            .from('order_items')
+            .delete()
+            .in('order_id', orderIds);
+
+        if (orderItemsError) {
+            console.error('Error deleting order items:', orderItemsError);
+            return { error: `Failed to cleanup order items: ${orderItemsError.message}` };
+        }
+    }
+
+    // 3. Delete orders associated with this table
     const { error: ordersError } = await supabase.from('orders').delete().eq('table_id', id);
     if (ordersError) {
         console.error('Error deleting table orders:', ordersError);
         return { error: `Failed to cleanup table orders: ${ordersError.message}` };
     }
 
-    // 2. Delete the table
+    // 4. Delete the table
     const { error } = await supabase.from('tables').delete().eq('id', id);
 
     if (error) {
