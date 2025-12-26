@@ -88,8 +88,22 @@ ${decodeURIComponent(itemsList)}
 
 Thank you for dining with us! 🍽️`);
 
-    const whatsappUrl = fullOrder.customer_phone
-        ? `https://wa.me/${fullOrder.customer_phone}?text=${message}`
+    // 5. Format phone number for WhatsApp (clean and add country code)
+    let formattedPhone = null;
+    if (fullOrder.customer_phone) {
+        // Remove all non-digit characters
+        let cleanPhone = fullOrder.customer_phone.replace(/\D/g, '');
+
+        // Add India country code if not present (assuming 10-digit Indian numbers)
+        if (cleanPhone.length === 10) {
+            cleanPhone = '91' + cleanPhone;
+        }
+
+        formattedPhone = cleanPhone;
+    }
+
+    const whatsappUrl = formattedPhone
+        ? `https://wa.me/${formattedPhone}?text=${message}`
         : null;
 
     revalidatePath('/admin/orders');
