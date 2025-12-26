@@ -26,6 +26,19 @@ export async function deleteCategory(id: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Unauthorized' };
 
+    // 1. First delete all menu_items in this category
+    const { error: itemsError } = await supabase
+        .from('menu_items')
+        .delete()
+        .eq('category_id', id)
+        .eq('user_id', user.id);
+
+    if (itemsError) {
+        console.error('Error deleting category items:', itemsError);
+        return { error: `Failed to delete items in category: ${itemsError.message}` };
+    }
+
+    // 2. Then delete the category
     const { error } = await supabase
         .from('categories')
         .delete()
@@ -34,7 +47,7 @@ export async function deleteCategory(id: string) {
 
     if (error) {
         console.error('Category delete error:', error);
-        return { error: 'Failed' };
+        return { error: `Failed to delete category: ${error.message}` };
     }
 
     revalidatePath('/admin/menu');

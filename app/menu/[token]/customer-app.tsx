@@ -360,12 +360,12 @@ export default function CustomerApp({ table, categories, items, posters, adminSe
                                             }
                                         }
                                     }}
-                                    className="relative overflow-hidden rounded-2xl shadow-md min-w-[75%] snap-center flex-shrink-0 aspect-[2.5/1] text-left transition-transform active:scale-[0.98]"
+                                    className="relative overflow-hidden rounded-xl shadow-sm min-w-[70%] max-h-28 snap-center flex-shrink-0 text-left transition-transform active:scale-[0.98]"
                                 >
                                     <img
                                         src={poster.image_url}
                                         alt={poster.title}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-28 object-cover"
                                     />
                                 </button>
                             ))}
