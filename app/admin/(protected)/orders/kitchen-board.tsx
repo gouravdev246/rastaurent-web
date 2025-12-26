@@ -107,10 +107,15 @@ export default function KitchenBoard({ initialOrders }: { initialOrders: any[] }
                 return;
             }
 
-            if (res.success && res.whatsappUrl && res.order) {
+            if (res.success && res.order) {
+                // Build order items string for email
+                const orderItemsList = res.order.order_items?.map((item: any) => {
+                    const itemName = item.menu_items?.name || 'Unknown Item';
+                    const itemPrice = item.price_at_time || item.menu_items?.price || 0;
+                    return `${item.quantity}x ${itemName} - ₹${itemPrice * item.quantity}`;
+                }).join(', ') || 'No items';
+
                 // 1. Send Email via EmailJS
-                // Replace with your actual Service ID, Template ID, and Public Key
-                // Use environment variables for EmailJS credentials
                 const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
                 const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!;
                 const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
@@ -118,27 +123,35 @@ export default function KitchenBoard({ initialOrders }: { initialOrders: any[] }
                 const templateParams = {
                     to_name: res.order.customer_name,
                     to_email: res.order.customer_email,
-                    // Mapping to user's "Tuition" template variables based on screenshot
-                    amount: res.order.total_amount, // Template uses {{amount}}
-                    month_for: new Date().toLocaleString('default', { month: 'long' }), // Template uses {{month_for}}
-                    remarks: `Order ID: #${res.order.id.slice(0, 8)}. Thank you for dining with us!` // Template uses {{remarks}}
+                    amount: res.order.total_amount,
+                    month_for: orderItemsList, // Use month_for field for order items
+                    remarks: `Order ID: #${res.order.id.slice(0, 8).toUpperCase()}
+Phone: ${res.order.customer_phone || 'N/A'}
+Table: ${res.order.tables?.name || 'N/A'}
+Date: ${new Date(res.order.created_at).toLocaleString()}
+
+Thank you for dining with us!`
                 };
 
-                // We try-catch EmailJS so it doesn't block the UI
+                // Try-catch EmailJS so it doesn't block the UI
                 try {
                     if (!res.order.customer_email) {
-                        alert("Note: No email address found for this customer. Receipt skips email.");
+                        console.log("No email address found for this customer.");
                     } else {
                         await emailjs.send(serviceId, templateId, templateParams, publicKey);
                         alert('Receipt sent to email: ' + res.order.customer_email);
                     }
                 } catch (emailErr: any) {
                     console.error("EmailJS Error:", emailErr);
-                    alert("Failed to send Email Receipt: " + JSON.stringify(emailErr));
+                    alert("Failed to send Email Receipt: " + (emailErr?.text || JSON.stringify(emailErr)));
                 }
 
-                // 2. Open WhatsApp
-                window.open(res.whatsappUrl, '_blank');
+                // 2. Open WhatsApp (if phone number exists)
+                if (res.whatsappUrl) {
+                    window.open(res.whatsappUrl, '_blank');
+                } else {
+                    alert("Note: No phone number found. WhatsApp message skipped.");
+                }
 
                 // 3. Optimistic update
                 setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'Paid' } : o));
