@@ -52,8 +52,6 @@ export async function createMenuItem(formData: FormData) {
     const description = formData.get('description') as string;
     const imageFile = formData.get('image') as File;
     const imageUrlInput = formData.get('image_url') as string;
-    const tagsInput = formData.get('tags') as string;
-    const pairingsInput = formData.get('pairings') as string;
 
     if (!name || isNaN(price) || !category_id) {
         return { error: 'Missing required fields' };
@@ -93,9 +91,7 @@ export async function createMenuItem(formData: FormData) {
         description,
         image_url: finalImageUrl,
         is_available: true,
-        user_id: user.id,
-        tags: tagsInput ? JSON.stringify(tagsInput.split(',').map(t => t.trim()).filter(Boolean)) : '[]'
-        // pairings field removed
+        user_id: user.id
     });
 
     if (error) {
@@ -116,8 +112,6 @@ export async function updateMenuItem(formData: FormData) {
     const description = formData.get('description') as string;
     const imageFile = formData.get('image') as File;
     const imageUrlInput = formData.get('image_url') as string;
-    const tagsInput = formData.get('tags') as string;
-    const pairingsInput = formData.get('pairings') as string;
 
     if (!id || !name || isNaN(price)) {
         return { error: 'Missing required fields' };
@@ -156,10 +150,7 @@ export async function updateMenuItem(formData: FormData) {
         updates.image_url = imageUrlInput.trim();
     }
 
-    if (tagsInput !== null) {
-        updates.tags = JSON.stringify(tagsInput.split(',').map(t => t.trim()).filter(Boolean));
-    }
-    // Pairings removed
+    // Tags and Pairings removed
 
     const { error } = await supabase
         .from('menu_items')

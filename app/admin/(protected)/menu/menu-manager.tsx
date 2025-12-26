@@ -187,8 +187,6 @@ function ItemModal({ categoryId, item, onClose }: { categoryId: string, item?: a
                         onClose();
                     }} className="space-y-4">
                         <input type="hidden" name="category_id" value={categoryId} />
-                        <input type="hidden" name="tags" value={item?.tags ? (typeof item.tags === 'string' ? item.tags : JSON.stringify(item.tags)) : '[]'} />
-                        <input type="hidden" name="pairings" value={item?.pairings ? (typeof item.pairings === 'string' ? item.pairings : JSON.stringify(item.pairings)) : '[]'} />
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
@@ -226,26 +224,6 @@ function ItemModal({ categoryId, item, onClose }: { categoryId: string, item?: a
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <label className="text-xs font-medium ml-1">Tags (comma separated)</label>
-                                <input
-                                    name="tags_input"
-                                    defaultValue={item?.tags ? (typeof item.tags === 'string' ? JSON.parse(item.tags).join(', ') : item.tags.join(', ')) : ''}
-                                    placeholder="spicy, vegan, popular"
-                                    className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 outline-none focus:ring-2 ring-primary/20 text-sm"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-medium ml-1">Pairing IDs (comma separated)</label>
-                                <input
-                                    name="pairings_input"
-                                    defaultValue={item?.pairings ? (typeof item.pairings === 'string' ? JSON.parse(item.pairings).join(', ') : item.pairings.join(', ')) : ''}
-                                    placeholder="ID1, ID2"
-                                    className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 outline-none focus:ring-2 ring-primary/20 text-sm"
-                                />
-                            </div>
-                        </div>
 
                         <div className="space-y-2">
                             <label className="text-xs font-medium ml-1">Image</label>
