@@ -208,7 +208,8 @@ export default function CustomerApp({ table, categories, items, posters, adminSe
             setView('success');
             setIsSubmitting(false); // Reset submitting state
         } else {
-            alert('Failed to place order. Please try again.');
+            console.error(res.error);
+            alert(`Failed to place order: ${res.error || 'Unknown error'}`);
             setIsSubmitting(false);
         }
     };
