@@ -81,25 +81,6 @@ export default function CustomerApp({ table, categories, items, posters, adminSe
         return () => clearTimeout(timer);
     }, []);
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-primary/5 flex flex-col items-center justify-center animate-in fade-in duration-500">
-                <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center shadow-lg shadow-primary/30 animate-bounce-slow mb-6">
-                    <Utensils size={48} className="text-white" />
-                </div>
-                <h1 className="text-3xl font-black text-foreground tracking-tight animate-pulse">
-                    {adminSettings?.restaurant_name || 'Rastaurent'}
-                </h1>
-                <p className="text-muted-foreground mt-2 font-medium">Fine Dining Experience</p>
-                <div className="mt-8 flex gap-2">
-                    <div className="w-3 h-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                    <div className="w-3 h-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
-                </div>
-            </div>
-        );
-    }
-
     // Load Cart from Session Storage on Mount
     useEffect(() => {
         try {
@@ -139,6 +120,25 @@ export default function CustomerApp({ table, categories, items, posters, adminSe
 
     const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-primary/5 flex flex-col items-center justify-center animate-in fade-in duration-500">
+                <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center shadow-lg shadow-primary/30 animate-bounce-slow mb-6">
+                    <Utensils size={48} className="text-white" />
+                </div>
+                <h1 className="text-3xl font-black text-foreground tracking-tight animate-pulse">
+                    {adminSettings?.restaurant_name || 'Rastaurent'}
+                </h1>
+                <p className="text-muted-foreground mt-2 font-medium">Fine Dining Experience</p>
+                <div className="mt-8 flex gap-2">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="w-3 h-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
+                </div>
+            </div>
+        );
+    }
 
     const addToCart = (item: any) => {
         setCart(prev => {

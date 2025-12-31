@@ -3,6 +3,71 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+// ==================== ADMIN SETTINGS ====================
+
+export async function getAdminSettings() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    const { data, error } = await supabase
+        .from('admin_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+    if (error) {
+        console.error('Error fetching admin settings:', error);
+        return null;
+    }
+    return data;
+}
+
+export async function updateRestaurantName(name: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { error: 'Unauthorized' };
+
+    // Check if settings exist
+    const { data: existing } = await supabase
+        .from('admin_settings')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+    let error;
+
+    if (existing) {
+        // Update
+        const res = await supabase
+            .from('admin_settings')
+            .update({ restaurant_name: name })
+            .eq('user_id', user.id);
+        error = res.error;
+    } else {
+        // Insert
+        const res = await supabase
+            .from('admin_settings')
+            .insert({
+                user_id: user.id,
+                restaurant_name: name,
+                is_ai_enabled: true // Default
+            });
+        error = res.error;
+    }
+
+    if (error) {
+        console.error('Error updating restaurant name:', error);
+        return { error: 'Failed to update restaurant name' };
+    }
+
+    revalidatePath('/admin/branding');
+    revalidatePath('/menu');
+    return { success: true };
+}
+
 // ==================== POSTERS ====================
 
 export async function getPosters() {
