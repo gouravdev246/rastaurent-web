@@ -56,7 +56,7 @@ type Poster = {
 
 export default function CustomerApp({ table, categories, items, posters, adminSettings }: { table: any; categories: Category[]; items: MenuItem[]; posters: Poster[]; adminSettings: any }) {
     const [cart, setCart] = useState<CartItem[]>([]);
-    const [view, setView] = useState<'home' | 'cart' | 'profile'>('home');
+    const [view, setView] = useState<'home' | 'cart' | 'profile' | 'success'>('home');
     const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
     const [customerDetails, setCustomerDetails] = useState({ name: '', phone: '', email: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
