@@ -74,15 +74,9 @@ export async function submitOrder(tableId: string, cartItems: any[], customerDet
     const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData);
 
     if (itemsError) {
-        console.error(itemsError);
-        // Logic to void order? For MVP, just return error but order exists... 
-        // User might see error but kitchen sees empty order. 
-        // Transaction would be better but simple Supabase JS doesn't expose easy transactions without RPC.
-        return { error: 'Failed to add items to order' };
+        console.error('Order Items Insert Error:', itemsError);
+        return { error: `Failed to add items to order: ${itemsError.message} (${itemsError.code})` };
     }
-
-    // Send Email (Placeholder)
-    // await sendOrderReceipt(order);
 
     return { success: true, orderId: order.id };
 }
