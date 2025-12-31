@@ -13,8 +13,23 @@ export async function submitOrder(tableId: string, cartItems: any[], customerDet
     // Calculate total server-side for security (though we iterate cartItems which come from client, 
     // ideally we should refetch prices. For MVP we trust but should verify. 
     // Let's fetch prices.)
+    // 1. Validate Table & Get Owner (Restaurant Admin)
+    const { data: tableData, error: tableError } = await supabase
+        .from('tables')
+        .select('user_id')
+        .eq('id', tableId)
+        .single();
+
+    if (tableError || !tableData) {
+        return { error: 'Invalid Table ID' };
+    }
+
+    // 2. Validate Cart Items & Prices
     const itemIds = cartItems.map(i => i.id);
-    const { data: dbItems } = await supabase.from('menu_items').select('id, price').in('id', itemIds);
+    const { data: dbItems } = await supabase
+        .from('menu_items')
+        .select('id, price')
+        .in('id', itemIds);
 
     if (!dbItems) return { error: 'Items not found' };
 
@@ -34,9 +49,10 @@ export async function submitOrder(tableId: string, cartItems: any[], customerDet
         }
     }
 
-    // Create Order
+    // 3. Create Order with linked Admin ID
     const { data: order, error: orderError } = await supabase.from('orders').insert({
         table_id: tableId,
+        user_id: tableData.user_id, // Link order to specific admin
         customer_name: customerDetails.name,
         customer_email: customerDetails.email,
         customer_phone: customerDetails.phone,

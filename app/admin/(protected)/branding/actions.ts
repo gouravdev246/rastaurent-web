@@ -30,33 +30,17 @@ export async function updateRestaurantName(name: string) {
 
     if (!user) return { error: 'Unauthorized' };
 
-    // Check if settings exist
-    const { data: existing } = await supabase
+    // Use upsert to handle both insert and update cases atomically.
+    // This avoids race conditions and "duplicate key" errors if the row exists but wasn't found by select.
+    // referencing the unique constraint on user_id.
+    const { error } = await supabase
         .from('admin_settings')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-    let error;
-
-    if (existing) {
-        // Update
-        const res = await supabase
-            .from('admin_settings')
-            .update({ restaurant_name: name })
-            .eq('user_id', user.id);
-        error = res.error;
-    } else {
-        // Insert
-        const res = await supabase
-            .from('admin_settings')
-            .insert({
-                user_id: user.id,
-                restaurant_name: name,
-                is_ai_enabled: true // Default
-            });
-        error = res.error;
-    }
+        .upsert({
+            user_id: user.id,
+            restaurant_name: name
+        }, {
+            onConflict: 'user_id'
+        });
 
     if (error) {
         console.error('Error updating restaurant name:', error);
