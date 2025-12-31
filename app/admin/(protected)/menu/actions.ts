@@ -26,7 +26,28 @@ export async function deleteCategory(id: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Unauthorized' };
 
-    // 1. First delete all menu_items in this category
+    // 1. Get all menu_item_ids in this category
+    const { data: menuItems } = await supabase
+        .from('menu_items')
+        .select('id')
+        .eq('category_id', id)
+        .eq('user_id', user.id);
+
+    // 2. Delete dependent order_items for these menu items
+    if (menuItems && menuItems.length > 0) {
+        const itemIds = menuItems.map(i => i.id);
+        const { error: cascadeError } = await supabase
+            .from('order_items')
+            .delete()
+            .in('menu_item_id', itemIds);
+
+        if (cascadeError) {
+            console.error('Error cleaning up order history:', cascadeError);
+            // We proceed anyway? No, validation error. But for deletion we try hard.
+        }
+    }
+
+    // 3. Delete menu_items
     const { error: itemsError } = await supabase
         .from('menu_items')
         .delete()
@@ -38,7 +59,7 @@ export async function deleteCategory(id: string) {
         return { error: `Failed to delete items in category: ${itemsError.message}` };
     }
 
-    // 2. Then delete the category
+    // 4. Delete the category
     const { error } = await supabase
         .from('categories')
         .delete()
@@ -193,6 +214,18 @@ export async function deleteMenuItem(id: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Unauthorized' };
 
+    // 1. Delete dependent order_items first
+    const { error: cascadeError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('menu_item_id', id);
+
+    if (cascadeError) {
+        console.error('Error cleaning up order history:', cascadeError);
+        return { error: `Failed to delete associated order history: ${cascadeError.message}` };
+    }
+
+    // 2. Delete the menu item
     const { error } = await supabase
         .from('menu_items')
         .delete()
