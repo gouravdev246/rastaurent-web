@@ -4,9 +4,16 @@ import MenuManager from './menu-manager';
 export default async function MenuPage() {
     const supabase = await createClient();
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        // Handle no user (redirect or empty)
+        return null;
+    }
+
     const { data: categories, error: catError } = await supabase
         .from('categories')
         .select('*')
+        .eq('user_id', user.id)
         .order('sort_order', { ascending: true });
 
     if (catError) console.error('Error fetching categories:', catError);
@@ -14,6 +21,7 @@ export default async function MenuPage() {
     const { data: menuItems, error: itemError } = await supabase
         .from('menu_items')
         .select('*')
+        .eq('user_id', user.id)
         .order('name', { ascending: true });
 
     if (itemError) console.error('Error fetching menu items:', itemError);

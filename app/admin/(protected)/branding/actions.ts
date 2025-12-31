@@ -78,10 +78,15 @@ export async function getPosters() {
 
 export async function getMenuItemsForSelection() {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
     const { data, error } = await supabase
         .from('menu_items')
         .select('id, name')
         .eq('is_available', true)
+        .eq('user_id', user.id)
         .order('name');
 
     if (error) {

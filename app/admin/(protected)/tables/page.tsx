@@ -3,7 +3,15 @@ import TableManager from './table-manager';
 
 export default async function TablesPage() {
     const supabase = await createClient();
-    const { data: tables } = await supabase.from('tables').select('*').order('created_at', { ascending: true });
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    const { data: tables } = await supabase
+        .from('tables')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
 
     return (
         <div className="p-8 max-w-7xl mx-auto">
