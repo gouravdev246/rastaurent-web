@@ -56,7 +56,8 @@ type Poster = {
 
 export default function CustomerApp({ table, categories, items, posters, adminSettings }: { table: any; categories: Category[]; items: MenuItem[]; posters: Poster[]; adminSettings: any }) {
     const [cart, setCart] = useState<CartItem[]>([]);
-    const [view, setView] = useState<'home' | 'cart' | 'profile' | 'success'>('home');
+    const [view, setView] = useState<'home' | 'cart' | 'profile'>('home');
+    const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
     const [customerDetails, setCustomerDetails] = useState({ name: '', phone: '', email: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -461,8 +462,9 @@ export default function CustomerApp({ table, categories, items, posters, adminSe
                             <div
                                 key={item.id}
                                 id={`item-${item.id}`}
+                                onClick={() => setSelectedItem(item)}
                                 className={clsx(
-                                    "bg-card rounded-2xl p-3 shadow-sm border border-border/50 group active:scale-[0.98] transition-all scroll-mt-32 relative",
+                                    "bg-card rounded-2xl p-3 shadow-sm border border-border/50 group active:scale-[0.98] transition-all scroll-mt-32 relative cursor-pointer",
                                     highlightedItems.includes(item.id) && "ring-2 ring-primary ring-offset-2 shadow-[0_0_20px_rgba(var(--primary),0.3)] scale-[1.02]"
                                 )}
                             >
@@ -480,7 +482,10 @@ export default function CustomerApp({ table, categories, items, posters, adminSe
                                         </div>
                                     )}
                                     <button
-                                        onClick={() => addToCart(item)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            addToCart(item);
+                                        }}
                                         className="absolute bottom-2 right-2 bg-white text-primary rounded-full p-2 shadow-lg active:scale-90 transition-transform"
                                     >
                                         <Plus size={16} strokeWidth={3} />
@@ -597,77 +602,147 @@ export default function CustomerApp({ table, categories, items, posters, adminSe
                 </div>
             )}
 
-            {/* Smart Pairing Popup (Glassmorphism) */}
-            {activePairingItem && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 w-full max-w-sm rounded-[2.5rem] shadow-2xl p-8 text-center relative animate-in zoom-in-95 duration-500">
-                        <button onClick={() => setActivePairingItem(null)} className="absolute right-6 top-6 text-muted-foreground hover:text-foreground">
-                            <X size={20} />
-                        </button>
+            {/* Item Details Modal */}
+            {
+                selectedItem && (
+                    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                        <div className="bg-background w-full max-w-lg h-[85vh] sm:h-auto sm:max-h-[85vh] rounded-t-[2rem] sm:rounded-3xl shadow-2xl overflow-y-auto animate-in slide-in-from-bottom-20 duration-500 relative flex flex-col">
 
-                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
-                            <Star size={32} className="fill-primary/20" />
-                        </div>
-
-                        <h3 className="text-xl font-bold mb-2">Perfect Pairing!</h3>
-                        <p className="text-muted-foreground text-sm mb-6">
-                            Since you added <span className="text-foreground font-bold">{activePairingItem.name}</span>, would you like to add these to your meal?
-                        </p>
-
-                        <div className="space-y-3 mb-8">
-                            {items
-                                .filter(i => {
-                                    const pIds = typeof activePairingItem.pairings === 'string' ? JSON.parse(activePairingItem.pairings) : activePairingItem.pairings;
-                                    return pIds.includes(i.id) && !cart.some(c => c.id === i.id);
-                                })
-                                .map(pairing => (
-                                    <div key={pairing.id} className="bg-white/40 rounded-2xl p-3 flex items-center justify-between border border-white/40">
-                                        <div className="flex items-center gap-3">
-                                            {pairing.image_url ? (
-                                                <img src={pairing.image_url} alt={pairing.name} className="w-12 h-12 rounded-xl object-cover" />
-                                            ) : (
-                                                <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center"><Utensils size={20} /></div>
-                                            )}
-                                            <div className="text-left">
-                                                <p className="font-bold text-sm leading-tight">{pairing.name}</p>
-                                                <p className="text-primary font-bold text-xs">₹{pairing.price}</p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => {
-                                                addToCart(pairing);
-                                                setActivePairingItem(null);
-                                            }}
-                                            className="bg-primary text-primary-foreground p-2 rounded-xl shadow-md"
-                                        >
-                                            <Plus size={16} />
-                                        </button>
+                            {/* Image Header */}
+                            <div className="relative h-64 sm:h-72 w-full shrink-0">
+                                {selectedItem.image_url ? (
+                                    <img
+                                        src={selectedItem.image_url}
+                                        alt={selectedItem.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-secondary flex items-center justify-center text-muted-foreground/30">
+                                        <Utensils size={64} />
                                     </div>
-                                ))}
-                        </div>
+                                )}
+                                <button
+                                    onClick={() => setSelectedItem(null)}
+                                    className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full backdrop-blur-md hover:bg-black/70 transition-colors"
+                                >
+                                    <X size={24} />
+                                </button>
+                                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
+                            </div>
 
-                        <button
-                            onClick={() => setActivePairingItem(null)}
-                            className="text-muted-foreground text-sm font-medium hover:text-foreground transition-colors"
-                        >
-                            No thanks, maybe later
-                        </button>
+                            {/* Content */}
+                            <div className="p-6 pt-2 flex-1 flex flex-col">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h2 className="text-2xl font-bold leading-tight">{selectedItem.name}</h2>
+                                    <span className="bg-primary/10 text-primary font-bold px-3 py-1 rounded-full text-lg whitespace-nowrap">
+                                        ₹{selectedItem.price}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-2 mb-6">
+                                    <div className="flex gap-0.5 text-orange-400">
+                                        {[1, 2, 3, 4, 5].map(i => (
+                                            <Star key={i} size={14} className="fill-current" />
+                                        ))}
+                                    </div>
+                                    <span className="text-sm text-muted-foreground">(4.5) • 120 reviews</span>
+                                </div>
+
+                                <p className="text-muted-foreground leading-relaxed text-lg mb-8 flex-1">
+                                    {selectedItem.description || "No description available for this item."}
+                                </p>
+
+                                <button
+                                    onClick={() => {
+                                        addToCart(selectedItem);
+                                        setSelectedItem(null);
+                                    }}
+                                    className="w-full bg-primary text-primary-foreground text-lg font-bold py-4 rounded-2xl shadow-lg shadow-primary/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={24} />
+                                    Add to Order
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
+
+            {/* Smart Pairing Popup (Glassmorphism) */}
+            {
+                activePairingItem && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-in fade-in duration-300">
+                        <div className="bg-white/70 backdrop-blur-xl border border-white/40 w-full max-w-sm rounded-[2.5rem] shadow-2xl p-8 text-center relative animate-in zoom-in-95 duration-500">
+                            <button onClick={() => setActivePairingItem(null)} className="absolute right-6 top-6 text-muted-foreground hover:text-foreground">
+                                <X size={20} />
+                            </button>
+
+                            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+                                <Star size={32} className="fill-primary/20" />
+                            </div>
+
+                            <h3 className="text-xl font-bold mb-2">Perfect Pairing!</h3>
+                            <p className="text-muted-foreground text-sm mb-6">
+                                Since you added <span className="text-foreground font-bold">{activePairingItem.name}</span>, would you like to add these to your meal?
+                            </p>
+
+                            <div className="space-y-3 mb-8">
+                                {items
+                                    .filter(i => {
+                                        const pIds = typeof activePairingItem.pairings === 'string' ? JSON.parse(activePairingItem.pairings) : activePairingItem.pairings;
+                                        return pIds.includes(i.id) && !cart.some(c => c.id === i.id);
+                                    })
+                                    .map(pairing => (
+                                        <div key={pairing.id} className="bg-white/40 rounded-2xl p-3 flex items-center justify-between border border-white/40">
+                                            <div className="flex items-center gap-3">
+                                                {pairing.image_url ? (
+                                                    <img src={pairing.image_url} alt={pairing.name} className="w-12 h-12 rounded-xl object-cover" />
+                                                ) : (
+                                                    <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center"><Utensils size={20} /></div>
+                                                )}
+                                                <div className="text-left">
+                                                    <p className="font-bold text-sm leading-tight">{pairing.name}</p>
+                                                    <p className="text-primary font-bold text-xs">₹{pairing.price}</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    addToCart(pairing);
+                                                    setActivePairingItem(null);
+                                                }}
+                                                className="bg-primary text-primary-foreground p-2 rounded-xl shadow-md"
+                                            >
+                                                <Plus size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                            </div>
+
+                            <button
+                                onClick={() => setActivePairingItem(null)}
+                                className="text-muted-foreground text-sm font-medium hover:text-foreground transition-colors"
+                            >
+                                No thanks, maybe later
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Floating Assistant Button */}
-            {!isAIOpen && adminSettings?.is_ai_enabled && (
-                <button
-                    onClick={() => setIsAIOpen(true)}
-                    className="fixed left-1/2 -translate-x-1/2 bottom-28 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-2xl flex items-center justify-center animate-bounce-slow z-40 group hover:scale-110 active:scale-95 transition-all"
-                >
-                    <div className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full border-2 border-white animate-ping"></div>
-                    <Bot size={28} />
-                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-primary text-xs font-bold px-3 py-1.5 rounded-full shadow-xl opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap border border-primary/20">Ask Assistant</span>
-                </button>
-            )}
-        </div>
+            {
+                !isAIOpen && adminSettings?.is_ai_enabled && (
+                    <button
+                        onClick={() => setIsAIOpen(true)}
+                        className="fixed left-1/2 -translate-x-1/2 bottom-28 w-14 h-14 bg-primary text-primary-foreground rounded-2xl shadow-2xl flex items-center justify-center animate-bounce-slow z-40 group hover:scale-110 active:scale-95 transition-all"
+                    >
+                        <div className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full border-2 border-white animate-ping"></div>
+                        <Bot size={28} />
+                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-primary text-xs font-bold px-3 py-1.5 rounded-full shadow-xl opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap border border-primary/20">Ask Assistant</span>
+                    </button>
+                )
+            }
+        </div >
     );
 }
 
