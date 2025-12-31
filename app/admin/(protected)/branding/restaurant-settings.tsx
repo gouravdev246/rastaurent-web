@@ -20,7 +20,7 @@ export default function RestaurantSettings({ initialName }: RestaurantSettingsPr
         const res = await updateRestaurantName(name);
 
         if (res.error) {
-            setMessage('Error saving name');
+            setMessage(`Error: ${res.error}`);
         } else {
             setMessage('Saved successfully!');
             setTimeout(() => setMessage(''), 3000);

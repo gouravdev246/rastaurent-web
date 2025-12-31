@@ -60,7 +60,7 @@ export async function updateRestaurantName(name: string) {
 
     if (error) {
         console.error('Error updating restaurant name:', error);
-        return { error: 'Failed to update restaurant name' };
+        return { error: error.message || 'Failed to update restaurant name' };
     }
 
     revalidatePath('/admin/branding');
