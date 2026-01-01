@@ -1,10 +1,10 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 export async function submitOrder(tableId: string, cartItems: any[], customerDetails: any) {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     if (!cartItems || cartItems.length === 0) {
         return { error: 'Cart is empty' };
