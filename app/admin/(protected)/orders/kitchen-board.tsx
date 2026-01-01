@@ -108,12 +108,18 @@ export default function KitchenBoard({ initialOrders }: { initialOrders: any[] }
             }
 
             if (res.success && res.order) {
-                // Build order items string for email
-                const orderItemsList = res.order.order_items?.map((item: any) => {
+                // Build order items HTML for email
+                const orderItemsHtml = res.order.order_items?.map((item: any) => {
                     const itemName = item.menu_items?.name || 'Unknown Item';
                     const itemPrice = item.price_at_time || item.menu_items?.price || 0;
-                    return `${item.quantity}x ${itemName} - ₹${itemPrice * item.quantity}`;
-                }).join(', ') || 'No items';
+                    return `
+                        <tr>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px;">${item.quantity}x ${itemName}</td>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px;">${item.quantity}</td>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px; text-align: right; font-weight: 600;">₹${itemPrice * item.quantity}</td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="3">No items</td></tr>';
 
                 // 1. Send Email via EmailJS
                 const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
@@ -124,13 +130,11 @@ export default function KitchenBoard({ initialOrders }: { initialOrders: any[] }
                     to_name: res.order.customer_name,
                     to_email: res.order.customer_email,
                     amount: res.order.total_amount,
-                    month_for: orderItemsList, // Use month_for field for order items
+                    order_items_html: orderItemsHtml, // Sending HTML string
                     remarks: `Order ID: #${res.order.id.slice(0, 8).toUpperCase()}
 Phone: ${res.order.customer_phone || 'N/A'}
 Table: ${res.order.tables?.name || 'N/A'}
-Date: ${new Date(res.order.created_at).toLocaleString()}
-
-Thank you for dining with us!`
+Date: ${new Date(res.order.created_at).toLocaleString()}`
                 };
 
                 // Try-catch EmailJS so it doesn't block the UI
