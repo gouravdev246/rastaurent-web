@@ -1,5 +1,10 @@
 import { createClient } from '@/utils/supabase/server';
-import KitchenBoard from './kitchen-board';
+import dynamic from 'next/dynamic';
+
+const KitchenBoard = dynamic(() => import('./kitchen-board'), {
+    loading: () => <div className="p-10 text-center animate-pulse">Loading Kitchen Board...</div>,
+    ssr: false
+});
 
 export default async function OrdersPage() {
     const supabase = await createClient();

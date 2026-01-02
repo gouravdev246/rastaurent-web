@@ -49,7 +49,8 @@ export async function getAnalyticsData(): Promise<DashboardStats> {
         `)
         .eq('tables.user_id', user.id)
         .eq('status', 'Paid') // Only count Paid orders for revenue? Maybe 'Completed' too depending on workflow
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(2000); // OPTIMIZATION: Limit to last 2000 orders to prevent slow page loads (3-4s).
 
     if (error) {
         console.error('Analytics Error:', error);
