@@ -1,13 +1,44 @@
 'use client';
 
 import { CustomerStats, DashboardStats } from './actions';
-import { DollarSign, ShoppingBag, Calendar, Users, TrendingUp } from 'lucide-react';
+import { DollarSign, ShoppingBag, Calendar, Users, TrendingUp, Download } from 'lucide-react';
 
 export default function AnalyticsView({ data }: { data: DashboardStats }) {
+    const handleExport = () => {
+        if (!data.customers || data.customers.length === 0) {
+            alert("No customer data to export.");
+            return;
+        }
+
+        const headers = ["Customer Name", "Phone", "Total Orders", "Total Spent", "Last Visit"];
+        const csvContent = [
+            headers.join(","),
+            ...data.customers.map(c =>
+                [
+                    `"${c.name}"`,
+                    `"${c.phone}"`,
+                    c.totalOrders,
+                    c.totalSpent.toFixed(2),
+                    new Date(c.lastVisit).toLocaleDateString()
+                ].join(",")
+            )
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `customer_analytics_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* ... existing stats cards ... */}
                 <StatCard
                     title="Today's Revenue"
                     value={`₹${data.revenue.daily.toFixed(2)}`}
@@ -40,9 +71,18 @@ export default function AnalyticsView({ data }: { data: DashboardStats }) {
 
             {/* Customer List */}
             <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-border">
-                    <h2 className="text-xl font-bold">Recent Customers</h2>
-                    <p className="text-sm text-muted-foreground">List of customers by recent activity</p>
+                <div className="p-6 border-b border-border flex justify-between items-center">
+                    <div>
+                        <h2 className="text-xl font-bold">Recent Customers</h2>
+                        <p className="text-sm text-muted-foreground">List of customers by recent activity</p>
+                    </div>
+                    <button
+                        onClick={handleExport}
+                        className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                    >
+                        <Download size={16} />
+                        Export CSV
+                    </button>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
